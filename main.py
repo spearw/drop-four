@@ -2,10 +2,11 @@ import numpy as np
 import pygame
 import sys
 import math
+import random
 
 class DropFour:
 
-    def __init__(self, row_count=6, column_count=7, board_color=(0,191,255), background_color=(0, 0, 0), player1_color=(220,20,60), player2_color=(255,255,102)):
+    def __init__(self, player1_is_human=True, player2_is_human=True, row_count=6, column_count=7, board_color=(0,191,255), background_color=(0, 0, 0), player1_color=(220,20,60), player2_color=(255,255,102)):
 
         # initalize pygame
         pygame.init()
@@ -16,7 +17,9 @@ class DropFour:
         self.board_color = board_color
         self.background_color = background_color
         self.player1_color = player1_color
+        self.player1_is_human = player1_is_human
         self.player2_color = player2_color
+        self.player2_is_human = player2_is_human
         self.game_over = False
         self.player_turn = 1
 
@@ -38,12 +41,17 @@ class DropFour:
     def play(self):
 
         while not self.game_over:
-            self.take_turn()
-        pygame.time.wait(500)
+            self.turn_loop()
+        pygame.time.wait(1000)
 
-    def take_turn(self):
+    def turn_loop(self):
 
         player_color = self.get_color()
+
+        if self.player_turn == 1 and not self.player1_is_human:
+            self.take_turn(random.randint(0, self.column_count - 1))
+        if self.player_turn == 2 and not self.player2_is_human:
+            self.take_turn(random.randint(0, self.column_count - 1))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -56,23 +64,24 @@ class DropFour:
             pygame.display.update()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                pygame.draw.rect(self.screen, self.background_color, (0, 0, self.width, self.SQUARESIZE))
-
                 posx = event.pos[0]
                 col = int(math.floor(posx / self.SQUARESIZE))
+                self.take_turn(col)
 
-                if self.is_valid_location(col):
-                    row = self.get_next_open_row(col)
-                    self.drop_piece(row, col, self.player_turn)
+    def take_turn(self, col):
+        pygame.draw.rect(self.screen, self.background_color, (0, 0, self.width, self.SQUARESIZE))
 
-                    if self.winning_move(self.player_turn):
-                        label = self.font.render(f"Player {self.player_turn} wins!!", 1, player_color)
-                        self.screen.blit(label, (40, 10))
-                        self.game_over = True
+        if self.is_valid_location(col):
+            self.drop_piece(col, self.player_turn)
 
-                self.draw_board()
+            if self.winning_move(self.player_turn):
+                label = self.font.render(f"Player {self.player_turn} wins!!", 1, self.get_color())
+                self.screen.blit(label, (40, 10))
+                self.game_over = True
 
-                self.player_turn = 1 if self.player_turn == 2 else 2
+        self.draw_board()
+
+        self.player_turn = 1 if self.player_turn == 2 else 2
 
     def get_color(self):
         if self.player_turn == 1:
@@ -85,7 +94,8 @@ class DropFour:
         return board
 
 
-    def drop_piece(self, row, col, piece):
+    def drop_piece(self, col, piece):
+        row = self.get_next_open_row(col)
         self.board[row][col] = piece
 
 
@@ -154,5 +164,5 @@ class DropFour:
         pygame.display.update()
 
 if __name__ == "__main__":
-    game = DropFour()
+    game = DropFour(False, False)
     game.play()
