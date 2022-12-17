@@ -153,12 +153,13 @@ class DropFour:
                                    self.RADIUS)
 
             for r in range(self.row_count):
-                if self.board[r][c] == 1:
-                    pygame.draw.circle(self.screen, self.player1_color, (
-                        int(c * self.SQUARESIZE + self.SQUARESIZE / 2), self.height - int(r * self.SQUARESIZE + self.SQUARESIZE / 2)),
-                                       self.RADIUS)
-                elif self.board[r][c] == 2:
-                    pygame.draw.circle(self.screen, self.player2_color, (
+
+                if not self.board[r][c] == 0:
+                    if self.board[r][c] == 1:
+                        color = self.player1_color
+                    if self.board[r][c] == 2:
+                        color = self.player2_color
+                    pygame.draw.circle(self.screen, color, (
                         int(c * self.SQUARESIZE + self.SQUARESIZE / 2), self.height - int(r * self.SQUARESIZE + self.SQUARESIZE / 2)),
                                        self.RADIUS)
         pygame.display.update()
